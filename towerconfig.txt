@@ -1,0 +1,43 @@
+sudo su - 
+source /var/lib/awx/venv/ansible/bin/activate
+umask 0022
+pip install --upgrade hvac
+deactivate
+
+Custom cred:
+Hashicorp Vault using approle
+
+INPUT CONFIGURATION
+
+fields:
+  - id: vault_address
+    type: string
+    label: Vault Address
+    secret: false
+  - id: role_id
+    type: string
+    label: Role ID
+    secret: false
+  - id: secret_id
+    type: string
+    label: Secret ID
+    secret: true
+  - id: ca_cert
+    type: string
+    label: Path to CA Cert
+    secret: false
+required:
+  - vault_address
+  - role_id
+  - secret_id
+
+INJECTOR CONFIGURATION
+
+env:
+  VAULT_ADDR: '{{ vault_address }}'
+  VAULT_AUTH_METHOD: approle
+  VAULT_ROLE_ID: '{{ role_id }}'
+  VAULT_SECRET_ID: '{{ secret_id }}'
+extra_vars:
+  vault_ca_cert: '{{ ca_cert }}'
+

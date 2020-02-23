@@ -1,0 +1,32 @@
+- name: test hashilookup
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    secret: "secret/host1"
+
+  tasks:
+  - name: authenticate with a Vault app role
+    debug:
+      msg: "{{ lookup('hashi_vault', 'secret=secret/host1')}}"
+    register: vaultcreds
+
+  - name: debug username
+    debug:
+      msg: "{{ vaultcreds.msg.username }}"
+  
+  - name: debug password
+    debug:
+      msg: "{{ vaultcreds.msg.password }}"
+
+  - name: Add hostname supplied by variable to adhoc_group
+    add_host:
+      group: adhoc_group
+      name: "192.168.33.11"
+      ansible_user: "{{ vaultcreds.msg.username }}"
+      ansible_password: "{{ vaultcreds.msg.password }}"
+ 
+- hosts: adhoc_group
+  tasks:
+  - ping:
